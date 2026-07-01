@@ -28,3 +28,6 @@ backend/.next
 *.njsproj
 *.sln
 *.sw?
+
+.vercel
+.env*

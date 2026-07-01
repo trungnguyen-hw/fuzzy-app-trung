@@ -248,6 +248,7 @@ export const AppProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('fuzzy_token');
+    localStorage.removeItem('fuzzy_app_unlocked');
     setUser({ name: "", email: "", isLoggedIn: false });
   };
 

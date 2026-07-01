@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AppGateRoute from './components/AppGateRoute';
 import AdminRoute from './components/AdminRoute';
 
 // Client Pages
@@ -34,33 +35,38 @@ function App() {
     <AppProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public Client Routes */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/landing" element={<Landing />} />
-          <Route path="/categories" element={<Categories />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/shipping" element={<Shipping />} />
+          {/* Only login is allowed without gate unlock */}
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
 
-          {/* Protected Client Routes */}
-          <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-          <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-          <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
-          <Route path="/saved-addresses" element={<ProtectedRoute><SavedAddresses /></ProtectedRoute>} />
+          {/* All other routes are protected by the gate */}
+          <Route element={<AppGateRoute />}>
+            {/* Public Client Routes */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/landing" element={<Landing />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/shipping" element={<Shipping />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Protected Admin Routes */}
-          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
-          <Route path="/admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
-          <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
-          <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-          <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+            {/* Protected Client Routes */}
+            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+            <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+            <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+            <Route path="/saved-addresses" element={<ProtectedRoute><SavedAddresses /></ProtectedRoute>} />
+
+            {/* Protected Admin Routes */}
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
+            <Route path="/admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
+            <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+            <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AppProvider>
