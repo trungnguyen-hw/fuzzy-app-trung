@@ -232,6 +232,24 @@ export const AppProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
+    // Check gate credentials first to bypass backend API call if needed
+    if (email.trim() === 'trungngo1903206' && password === 'trunglove123') {
+      const userData = { 
+        id: 99,
+        name: "Trung Nguyen", 
+        email: "trungngo1903206", 
+        username: "trungngo1903206",
+        role: "user", 
+        isLoggedIn: true 
+      };
+      setUser(userData);
+      localStorage.setItem('fuzzy_token', 'mock_jwt_token_user_gate');
+      localStorage.setItem('fuzzy_app_unlocked', 'true');
+      localStorage.setItem('fuzzy_gate_user', 'trungngo1903206');
+      return { success: true, user: userData };
+    }
+
+    // Otherwise, call backend API
     const res = await apiService.login(email, password);
     const userRole = res.user?.role || ((email === 'trungngo1903' || email === 'trungngo1903@gmail.com') ? 'admin' : 'user');
     const userData = { 
@@ -243,6 +261,7 @@ export const AppProvider = ({ children }) => {
       isLoggedIn: true 
     };
     setUser(userData);
+    localStorage.setItem('fuzzy_app_unlocked', 'true');
     return res;
   };
 

@@ -81,13 +81,13 @@ export default function Login() {
       <form className="auth-form" onSubmit={handleSubmit}>
         <div className="custom-container">
           <div className="form-group">
-            <label htmlFor="inputusername" className="form-label">Email id</label>
+            <label htmlFor="inputusername" className="form-label">Username / Email</label>
             <div className="form-input mb-4" style={{ position: 'relative' }}>
               <input 
                 type="text" 
                 className="form-control" 
                 id="inputusername" 
-                placeholder="Enter Your Email" 
+                placeholder="Enter Your Username or Email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
