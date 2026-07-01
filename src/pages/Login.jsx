@@ -7,269 +7,181 @@ export default function Login() {
   const navigate = useNavigate();
   const { login, user } = useApp();
 
-  const [isUnlocked, setIsUnlocked] = useState(localStorage.getItem('fuzzy_app_unlocked') === 'true');
-  const token = localStorage.getItem('fuzzy_token');
-  const isLoggedIn = user?.isLoggedIn || token;
-
-  // Direct redirection if already fully logged in to both gate and store
-  useEffect(() => {
-    if (isUnlocked && isLoggedIn) {
-      navigate('/', { replace: true });
-    }
-  }, [isUnlocked, isLoggedIn, navigate]);
-
-  // Form states for Gate Login
-  const [usernameGate, setUsernameGate] = useState('');
-  const [passwordGate, setPasswordGate] = useState('');
-  
-  // Form states for Store Login
-  const [emailStore, setEmailStore] = useState('trungngo1903');
-  const [passwordStore, setPasswordStore] = useState('trunglove123');
-
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  // Handle Gate Login
-  const handleGateSubmit = (e) => {
+  // Dynamically set body class for auth page styling
+  useEffect(() => {
+    document.body.classList.add('auth-body');
+    return () => {
+      document.body.classList.remove('auth-body');
+    };
+  }, []);
+
+  // Direct redirection if already fully logged in to both gate and store
+  useEffect(() => {
+    const isUnlocked = localStorage.getItem('fuzzy_app_unlocked') === 'true';
+    const token = localStorage.getItem('fuzzy_token');
+    const isLoggedIn = user?.isLoggedIn || token;
+    
+    if (isUnlocked && isLoggedIn) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!usernameGate.trim()) {
-      setError('Vui lòng nhập tài khoản mở cổng');
+    if (!email || !email.trim()) {
+      setError('Please enter your Email id');
       return;
     }
-    if (!passwordGate.trim()) {
-      setError('Vui lòng nhập mật khẩu mở cổng');
-      return;
-    }
-
-    if (usernameGate.trim() === 'trungngo1903206' && passwordGate === 'trunglove123') {
-      localStorage.setItem('fuzzy_app_unlocked', 'true');
-      setIsUnlocked(true);
-      setError('');
-      navigate('/');
-    } else {
-      setError('Tài khoản hoặc mật khẩu mở cổng không chính xác!');
-    }
-  };
-
-  // Handle Store Login
-  const handleStoreSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (!emailStore.trim()) {
-      setError('Vui lòng nhập Email hoặc Username');
-      return;
-    }
-
-    if (passwordStore.length < 6) {
-      setError('Mật khẩu phải chứa ít nhất 6 ký tự');
+    if (!password || !password.trim()) {
+      setError('Please enter your Password');
       return;
     }
 
     try {
-      const res = await login(emailStore, passwordStore);
-      if (res.user?.role === 'admin' || emailStore === 'trungngo1903') {
+      // Check if it's the gate login credentials
+      if (email.trim() === 'trungngo1903206' && password === 'trunglove123') {
+        localStorage.setItem('fuzzy_app_unlocked', 'true');
+        // Automaticaly log them in as a default user (Agasya) so they have an active session inside the app
+        await login('agasya@fuzzy.com', '123456');
+        navigate('/');
+        return;
+      }
+
+      // Check normal store logins
+      const res = await login(email.trim(), password);
+      // Unlock the gate too
+      localStorage.setItem('fuzzy_app_unlocked', 'true');
+
+      if (res.user?.role === 'admin' || email.trim() === 'trungngo1903') {
         navigate('/admin');
       } else {
-        navigate('/profile');
+        navigate('/');
       }
     } catch (err) {
-      setError(err.message || 'Đăng nhập thất bại');
+      setError(err.message || 'Invalid email or password');
     }
   };
 
-  // If app is locked, render Gate Login UI
-  if (!isUnlocked) {
-    return (
-      <div className="login-page-wrapper" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', padding: '15px' }}>
-        <div className="login-card" style={{ width: '100%', maxWidth: '420px', background: '#ffffff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)', padding: '24px' }}>
-          <div className="login-header-box text-center mb-4">
-            <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#122636', marginBottom: '8px' }}>Fuzzy Mobile E-commerce</h1>
-            <p style={{ fontSize: '14px', color: '#64748b' }}>Mở khóa cổng hệ thống để tiếp tục</p>
-          </div>
-
-          <div className="login-body">
-            {error && (
-              <div className="alert alert-danger p-2 mb-3 text-center" style={{ fontSize: '14px', borderRadius: '8px', color: '#b91c1c', backgroundColor: '#fef2f2', border: '1px solid #fee2e2' }}>
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleGateSubmit}>
-              <div className="auth-form-group mb-3">
-                <label htmlFor="inputGateUsername" className="auth-form-label" style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#334155' }}>
-                  Tài khoản Cổng
-                </label>
-                <div className="auth-input-wrapper" style={{ position: 'relative' }}>
-                  <input 
-                    type="text" 
-                    className="auth-input-field form-control" 
-                    id="inputGateUsername" 
-                    placeholder="Nhập tài khoản mở cổng" 
-                    value={usernameGate}
-                    onChange={(e) => setUsernameGate(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '12px 16px 12px 45px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px', color: '#1e293b' }}
-                  />
-                  <span className="auth-input-icon" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }}>
-                    <Iconsax icon="user" />
-                  </span>
-                </div>
-              </div>
-
-              <div className="auth-form-group mb-4">
-                <label htmlFor="inputGatePassword" className="auth-form-label" style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#334155' }}>
-                  Mật khẩu Cổng
-                </label>
-                <div className="auth-input-wrapper" style={{ position: 'relative' }}>
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    className="auth-input-field form-control" 
-                    id="inputGatePassword" 
-                    placeholder="Nhập mật khẩu mở cổng" 
-                    value={passwordGate}
-                    onChange={(e) => setPasswordGate(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '12px 45px 12px 45px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px', color: '#1e293b' }}
-                  />
-                  <span className="auth-input-icon" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }}>
-                    <Iconsax icon="lock" />
-                  </span>
-                  <button
-                    type="button"
-                    className="border-0 bg-transparent position-absolute end-0 top-50 translate-middle-y me-3 p-0"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{ zIndex: 10, cursor: 'pointer', color: '#64748b' }}
-                  >
-                    <Iconsax icon={showPassword ? "eye-slash" : "eye"} />
-                  </button>
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                className="btn w-100" 
-                style={{ backgroundColor: '#122636', color: '#ffffff', padding: '12px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', border: 'none', transition: 'background 0.2s', cursor: 'pointer' }}
-              >
-                Mở khóa hệ thống
-              </button>
-
-              <div className="demo-credentials-box mt-4 p-3 rounded" style={{ backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0' }}>
-                <p className="m-0 mb-1" style={{ fontSize: '13px', fontWeight: '600', color: '#475569' }}>🔑 Tài khoản mở cổng:</p>
-                <p className="m-0" style={{ fontSize: '12px', color: '#64748b' }}>Username: <code style={{ fontWeight: '600', color: '#0f172a' }}>trungngo1903206</code></p>
-                <p className="m-0" style={{ fontSize: '12px', color: '#64748b' }}>Password: <code style={{ fontWeight: '600', color: '#0f172a' }}>trunglove123</code></p>
-              </div>
-            </form>
+  return (
+    <>
+      {/* login section start */}
+      <div className="auth-img">
+        <img className="img-fluid auth-bg" src="/assets/images/background/auth_bg.jpg" alt="auth_bg" />
+        <div className="auth-content">
+          <div>
+            <h2>Hello Again!</h2>
+            <h4 className="p-0">Welcome back, You have been missed!</h4>
           </div>
         </div>
       </div>
-    );
-  }
 
-  // If unlocked, render original Store Login UI
-  return (
-    <div className="login-page-wrapper">
-      <div className="login-card">
-        <div className="login-header-box">
-          <h2>Đăng nhập Cửa hàng</h2>
-          <p>Chào mừng bạn trở lại Fuzzy App</p>
-        </div>
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="custom-container">
+          <div className="form-group">
+            <label htmlFor="inputusername" className="form-label">Email id</label>
+            <div className="form-input mb-4" style={{ position: 'relative' }}>
+              <input 
+                type="text" 
+                className="form-control" 
+                id="inputusername" 
+                placeholder="Enter Your Email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Iconsax icon="mail" className="icons" />
+            </div>
+          </div>
 
-        <div className="login-body">
+          <div className="form-group">
+            <label htmlFor="inputPassword" className="form-label">Password</label>
+            <div className="form-input" style={{ position: 'relative' }}>
+              <input 
+                type={showPassword ? "text" : "password"} 
+                className="form-control" 
+                id="inputPassword" 
+                placeholder="Enter Your Password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ paddingRight: '75px' }}
+              />
+              <Iconsax icon="key" className="icons" style={{ right: '15px' }} />
+              <button
+                type="button"
+                className="border-0 bg-transparent position-absolute"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ right: '45px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer', color: '#cbd5e1' }}
+              >
+                <Iconsax icon={showPassword ? "eye-slash" : "eye"} style={{ fontSize: '18px' }} />
+              </button>
+            </div>
+          </div>
+
+          <div className="option mt-3">
+            <div className="form-check">
+              <input className="form-check-input" type="checkbox" defaultValue="" id="flexCheckDefault" defaultChecked />
+              <label className="form-check-label" htmlFor="flexCheckDefault">Remember me</label>
+            </div>
+            <a className="forgot" href="#forgot" onClick={(e) => e.preventDefault()}>Forgot password?</a>
+          </div>
+
           {error && (
-            <div className="alert alert-danger p-2 mb-3 text-center" style={{ fontSize: '14px', borderRadius: '8px' }}>
-              {error}
+            <div className="text-danger mt-3 mb-1" style={{ fontSize: '13px', fontWeight: '500' }}>
+              ⚠️ {error}
             </div>
           )}
 
-          <form onSubmit={handleStoreSubmit}>
-            <div className="auth-form-group">
-              <label htmlFor="inputusername" className="auth-form-label">Tài khoản / Email / Username</label>
-              <div className="auth-input-wrapper">
-                <input 
-                  type="text" 
-                  className="auth-input-field" 
-                  id="inputusername" 
-                  placeholder="Nhập Email hoặc Username" 
-                  value={emailStore}
-                  onChange={(e) => setEmailStore(e.target.value)}
-                  required
-                />
-                <span className="auth-input-icon">
-                  <Iconsax icon="user" />
-                </span>
-              </div>
-            </div>
+          <div className="submit-btn mt-4">
+            <button type="submit" className="btn auth-btn w-100">Sign In</button>
+          </div>
 
-            <div className="auth-form-group">
-              <label htmlFor="inputPassword" className="auth-form-label">Mật khẩu</label>
-              <div className="auth-input-wrapper">
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  className="auth-input-field" 
-                  id="inputPassword" 
-                  placeholder="Nhập Mật khẩu" 
-                  value={passwordStore}
-                  onChange={(e) => setPasswordStore(e.target.value)}
-                  required
-                  style={{ paddingRight: '45px' }}
-                />
-                <span className="auth-input-icon">
-                  <Iconsax icon="lock" />
-                </span>
-                <button
-                  type="button"
-                  className="border-0 bg-transparent position-absolute end-0 top-50 translate-middle-y me-3 p-0"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{ zIndex: 10, cursor: 'pointer', color: '#64748b' }}
-                >
-                  <Iconsax icon={showPassword ? "eye-slash" : "eye"} />
-                </button>
-              </div>
-            </div>
+          <div className="division">
+            <span>OR</span>
+          </div>
 
-            <div className="auth-options">
-              <div className="d-flex align-items-center">
-                <input type="checkbox" defaultChecked id="rememberMe" />
-                <label htmlFor="rememberMe">Ghi nhớ đăng nhập</label>
-              </div>
-              <a className="auth-forgot-link" href="#forgot" onClick={(e) => e.preventDefault()}>Quên mật khẩu?</a>
-            </div>
+          <ul className="social-media">
+            <li>
+              <a href="https://www.facebook.com/login/" target="_blank" rel="noreferrer">
+                <img className="img-fluid icons" src="/assets/images/svg/facebook.svg" alt="facebook" />
+              </a>
+            </li>
+            <li>
+              <a href="https://www.google.co.in/" target="_blank" rel="noreferrer">
+                <img className="img-fluid icons" src="/assets/images/svg/google.svg" alt="google" />
+              </a>
+            </li>
+            <li>
+              <a href="https://www.apple.com/in/" target="_blank" rel="noreferrer">
+                <img className="img-fluid icons" src="/assets/images/svg/apple.svg" alt="apple" />
+              </a>
+            </li>
+          </ul>
 
-            <button type="submit" className="auth-btn-submit">
-              <span>Đăng nhập</span>
-            </button>
+          <h4 className="signup">Don’t have an account ?<Link to="/register"> Sign up</Link></h4>
 
-            <div className="auth-divider">
-              <span>Hoặc</span>
-            </div>
-
-            <ul className="social-media p-0 m-0 list-unstyled d-flex justify-content-center gap-3">
-              <li>
-                <a href="https://www.facebook.com/login/" target="_blank" rel="noreferrer" className="btn btn-light border rounded-circle p-2 d-flex align-items-center justify-content-center" style={{ width: '42px', height: '42px' }}>
-                  <img className="img-fluid" src="/assets/images/svg/facebook.svg" alt="facebook" style={{ width: '20px' }} />
-                </a>
-              </li>
-              <li>
-                <a href="https://www.google.co.in/" target="_blank" rel="noreferrer" className="btn btn-light border rounded-circle p-2 d-flex align-items-center justify-content-center" style={{ width: '42px', height: '42px' }}>
-                  <img className="img-fluid" src="/assets/images/svg/google.svg" alt="google" style={{ width: '20px' }} />
-                </a>
-              </li>
-              <li>
-                <a href="https://www.apple.com/in/" target="_blank" rel="noreferrer" className="btn btn-light border rounded-circle p-2 d-flex align-items-center justify-content-center" style={{ width: '42px', height: '42px' }}>
-                  <img className="img-fluid" src="/assets/images/svg/apple.svg" alt="apple" style={{ width: '20px' }} />
-                </a>
-              </li>
-            </ul>
-
-            <div className="auth-footer-text">
-              Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
-            </div>
-          </form>
+          {/* Ghi chú tài khoản Demo dưới chân trang */}
+          <div className="mt-4 p-2 rounded text-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+            <p className="m-0" style={{ fontSize: '11px', color: '#94a3b8' }}>
+              Gate: <span style={{ color: '#f8fafc', fontWeight: '600' }}>trungngo1903206</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>trunglove123</span>
+            </p>
+            <p className="m-0" style={{ fontSize: '11px', color: '#94a3b8' }}>
+              User: <span style={{ color: '#f8fafc', fontWeight: '600' }}>agasya@fuzzy.com</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>123456</span>
+            </p>
+            <p className="m-0" style={{ fontSize: '11px', color: '#94a3b8' }}>
+              Admin: <span style={{ color: '#f8fafc', fontWeight: '600' }}>trungngo1903</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>trunglove123</span>
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+      </form>
+      {/* login section end */}
+    </>
   );
 }
