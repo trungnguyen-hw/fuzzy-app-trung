@@ -16,6 +16,7 @@ backend/node_modules
 backend/.next
 .env
 .env.local
+.vercel
 
 # Editor directories and files
 .vscode/*

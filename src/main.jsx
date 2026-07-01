@@ -15,11 +15,17 @@ function MainRoot() {
 
     // Register PWA Service Worker
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+      const registerSW = () => {
         navigator.serviceWorker.register('/sw.js')
           .then(reg => console.log('SW Registered:', reg.scope))
           .catch(err => console.log('SW Registration failed:', err));
-      });
+      };
+
+      if (document.readyState === 'complete') {
+        registerSW();
+      } else {
+        window.addEventListener('load', registerSW);
+      }
     }
 
     return () => {

@@ -39,7 +39,8 @@ self.addEventListener('fetch', (event) => {
     fetch(event.request).catch(() => {
       return caches.match(event.request).then(response => {
         if (response) return response;
-        if (event.request.headers.get('accept').includes('text/html')) {
+        const acceptHeader = event.request.headers.get('accept');
+        if (acceptHeader && acceptHeader.includes('text/html')) {
           return caches.match('/index.html');
         }
       });
