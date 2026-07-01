@@ -27,7 +27,11 @@ export default function Login() {
     const isLoggedIn = user?.isLoggedIn || token;
     
     if (isUnlocked && isLoggedIn) {
-      navigate('/', { replace: true });
+      if (user?.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     }
   }, [user, navigate]);
 
@@ -45,27 +49,19 @@ export default function Login() {
     }
 
     try {
-      // Check if it's the gate login credentials
-      if (email.trim() === 'trungngo1903206' && password === 'trunglove123') {
-        localStorage.setItem('fuzzy_app_unlocked', 'true');
-        // Automaticaly log them in as a default user (Agasya) so they have an active session inside the app
-        await login('agasya@fuzzy.com', '123456');
-        navigate('/');
-        return;
-      }
-
-      // Check normal store logins
       const res = await login(email.trim(), password);
-      // Unlock the gate too
+      
+      // Unlock the gate on any successful login
       localStorage.setItem('fuzzy_app_unlocked', 'true');
 
-      if (res.user?.role === 'admin' || email.trim() === 'trungngo1903') {
+      // Navigate based on user role
+      if (res.user?.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/');
       }
     } catch (err) {
-      setError(err.message || 'Invalid email or password');
+      setError('Sai tài khoản hoặc mật khẩu, vui lòng thử lại');
     }
   };
 
@@ -170,10 +166,7 @@ export default function Login() {
           {/* Ghi chú tài khoản Demo dưới chân trang */}
           <div className="mt-4 p-2 rounded text-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
             <p className="m-0" style={{ fontSize: '11px', color: '#94a3b8' }}>
-              Gate: <span style={{ color: '#f8fafc', fontWeight: '600' }}>trungngo1903206</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>trunglove123</span>
-            </p>
-            <p className="m-0" style={{ fontSize: '11px', color: '#94a3b8' }}>
-              User: <span style={{ color: '#f8fafc', fontWeight: '600' }}>agasya@fuzzy.com</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>123456</span>
+              User: <span style={{ color: '#f8fafc', fontWeight: '600' }}>trungngo1903206</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>trunglove123</span>
             </p>
             <p className="m-0" style={{ fontSize: '11px', color: '#94a3b8' }}>
               Admin: <span style={{ color: '#f8fafc', fontWeight: '600' }}>trungngo1903</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>trunglove123</span>

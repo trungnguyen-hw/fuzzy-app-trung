@@ -19,30 +19,17 @@ export const apiService = {
   },
 
   async login(email, password) {
-    try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, username: email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Đăng nhập thất bại');
-      if (data.token) {
-        localStorage.setItem('fuzzy_token', data.token);
-      }
-      return data;
-    } catch (err) {
-      console.warn('Backend API fallback:', err.message);
-      const isDemoAdmin = (email === 'trungngo1903' || email === 'trungngo1903@gmail.com') && password === 'trunglove123';
-      const role = isDemoAdmin ? 'admin' : 'user';
-      const mockToken = "mock_jwt_token_" + role;
-      localStorage.setItem('fuzzy_token', mockToken);
-      return { 
-        success: true, 
-        token: mockToken, 
-        user: { name: role === 'admin' ? 'System Admin' : email.split('@')[0], email, username: email, role } 
-      };
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, username: email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Sai tài khoản hoặc mật khẩu, vui lòng thử lại');
+    if (data.token) {
+      localStorage.setItem('fuzzy_token', data.token);
     }
+    return data;
   },
 
   // Products

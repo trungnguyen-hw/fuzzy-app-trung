@@ -87,7 +87,7 @@ export const AppProvider = ({ children }) => {
   // Auth State
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('fuzzy_user');
-    return saved ? JSON.parse(saved) : { name: "Agasya", email: "agasya@fuzzy.com", isLoggedIn: true };
+    return saved ? JSON.parse(saved) : { name: "", email: "", isLoggedIn: false };
   });
 
   // Orders State
