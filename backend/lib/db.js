@@ -4,9 +4,9 @@ let users = [
   { 
     id: 1, 
     name: "System Admin", 
-    email: "trungngo1903", 
-    username: "trungngo1903",
-    password: "trunglove123", 
+    email: "admin", 
+    username: "admin",
+    password: "admin123", 
     role: "admin", 
     status: "Active", 
     phone: "0901234567", 
@@ -15,36 +15,15 @@ let users = [
   },
   { 
     id: 2, 
-    name: "Agasya Watkin", 
-    email: "agasya@fuzzy.com", 
-    password: "123456", 
+    name: "Trung Nguyen", 
+    email: "trungngo1903206", 
+    username: "trungngo1903206",
+    password: "trunglove123", 
     role: "user", 
     status: "Active", 
     phone: "0912345678", 
     avatar: "/assets/images/icons/profile1.png", 
     createdAt: "2026-02-15" 
-  },
-  { 
-    id: 3, 
-    name: "Trung Nguyen", 
-    email: "trung@fuzzy.com", 
-    password: "123456", 
-    role: "user", 
-    status: "Active", 
-    phone: "0987654321", 
-    avatar: "/assets/images/icons/profile2.png", 
-    createdAt: "2026-03-10" 
-  },
-  { 
-    id: 4, 
-    name: "John Doe", 
-    email: "john@gmail.com", 
-    password: "123456", 
-    role: "user", 
-    status: "Locked", 
-    phone: "0933445566", 
-    avatar: "/assets/images/icons/profile3.png", 
-    createdAt: "2026-04-05" 
   }
 ];
 

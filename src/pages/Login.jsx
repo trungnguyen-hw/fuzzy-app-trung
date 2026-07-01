@@ -169,7 +169,7 @@ export default function Login() {
               User: <span style={{ color: '#f8fafc', fontWeight: '600' }}>trungngo1903206</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>trunglove123</span>
             </p>
             <p className="m-0" style={{ fontSize: '11px', color: '#94a3b8' }}>
-              Admin: <span style={{ color: '#f8fafc', fontWeight: '600' }}>trungngo1903</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>trunglove123</span>
+              Admin: <span style={{ color: '#f8fafc', fontWeight: '600' }}>admin</span> / <span style={{ color: '#f8fafc', fontWeight: '600' }}>admin123</span>
             </p>
           </div>
         </div>
