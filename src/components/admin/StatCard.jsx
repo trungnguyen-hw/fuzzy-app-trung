@@ -1,20 +1,24 @@
 import React from 'react';
 import Iconsax from '../Iconsax';
 
-export default function StatCard({ title, value, icon, color = 'primary', trend }) {
+export default function StatCard({ title, value, icon, color = 'primary', trend, emoji }) {
   return (
-    <div className="stat-card">
-      <div>
-        <span className="text-secondary fw-medium" style={{ fontSize: '13px' }}>{title}</span>
-        <h3 className="fw-bold my-1 text-dark">{value}</h3>
+    <div className="admin-stat-card">
+      <div className="admin-stat-info">
+        <span className="admin-stat-title">{title}</span>
+        <h3 className="admin-stat-value">{value}</h3>
         {trend && (
-          <span className="text-success fw-medium" style={{ fontSize: '12px' }}>
-            <Iconsax icon="arrow-up-3" className="me-1" /> {trend}
+          <span className="admin-stat-trend">
+            <span className="admin-trend-icon">📈</span> {trend}
           </span>
         )}
       </div>
-      <div className={`stat-icon bg-${color}-subtle text-${color}`}>
-        <Iconsax icon={icon} />
+      <div className={`admin-stat-icon-box admin-bg-${color}`}>
+        {emoji ? (
+          <span className="admin-stat-emoji" style={{ fontSize: '24px' }}>{emoji}</span>
+        ) : (
+          <Iconsax icon={icon} />
+        )}
       </div>
     </div>
   );

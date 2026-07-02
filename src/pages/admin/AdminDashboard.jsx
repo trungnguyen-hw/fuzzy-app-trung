@@ -66,23 +66,23 @@ export default function AdminDashboard() {
   };
 
   return (
-    <AdminLayout title="Dashboard Tổng quan">
+    <AdminLayout title="📊 Dashboard Tổng quan">
       {/* Metrics Row */}
       <div className="row g-3 mb-4">
         <div className="col-12 col-sm-6 col-lg-4 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Tổng sản phẩm" value={metrics.productsCount} icon="box" color="primary" />
+          <StatCard title="Tổng sản phẩm" value={metrics.productsCount} icon="box" color="primary" emoji="🛋️" trend="+5% tháng này" />
         </div>
         <div className="col-12 col-sm-6 col-lg-4 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Tổng đơn hàng" value={metrics.ordersCount} icon="shopping-bag" color="success" />
+          <StatCard title="Tổng đơn hàng" value={metrics.ordersCount} icon="shopping-bag" color="success" emoji="📦" trend="+12% tuần này" />
         </div>
         <div className="col-12 col-sm-6 col-lg-4 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Tổng doanh thu" value={`$${metrics.totalRevenue.toFixed(2)}`} icon="wallet-money" color="info" />
+          <StatCard title="Tổng doanh thu" value={`$${metrics.totalRevenue.toFixed(2)}`} icon="wallet-money" color="info" emoji="💰" trend="+18% tháng này" />
         </div>
         <div className="col-12 col-sm-6 col-lg-6 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Đơn chờ xác nhận" value={metrics.pendingOrders} icon="clock" color="warning" />
+          <StatCard title="Đơn chờ xác nhận" value={metrics.pendingOrders} icon="clock" color="warning" emoji="⏳" trend="Chờ xử lý" />
         </div>
         <div className="col-12 col-sm-6 col-lg-6 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Tổng người dùng" value={metrics.usersCount} icon="user" color="secondary" />
+          <StatCard title="Tổng người dùng" value={metrics.usersCount} icon="user" color="secondary" emoji="👥" trend="+8% tháng này" />
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
         <div className="col-12 col-xl-8">
           <div className="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="fw-bold m-0 text-dark">Đơn hàng gần đây</h5>
+              <h5 className="fw-bold m-0 text-dark">📦 Đơn hàng gần đây</h5>
               <Link to="/admin/orders" className="btn btn-sm btn-outline-primary rounded-pill">Xem tất cả</Link>
             </div>
             <div className="table-responsive">
@@ -129,17 +129,20 @@ export default function AdminDashboard() {
         <div className="col-12 col-xl-4">
           <div className="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="fw-bold m-0 text-dark">Cảnh báo tồn kho</h5>
+              <h5 className="fw-bold m-0 text-dark">⚠️ Cảnh báo tồn kho</h5>
               <Iconsax icon="danger" className="text-danger fs-4" />
             </div>
             <div className="d-flex flex-column gap-3">
               {lowStockProducts.map(p => (
-                <div key={p.id} className="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light">
-                  <div>
-                    <h6 className="fw-bold m-0 text-dark" style={{ fontSize: '14px' }}>{p.name}</h6>
-                    <span className="text-secondary" style={{ fontSize: '12px' }}>Giá: ${p.price}</span>
+                <div key={p.id} className="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-3 border-danger">
+                  <div className="d-flex align-items-center gap-2">
+                    <span style={{ fontSize: '18px' }}>⚠️</span>
+                    <div>
+                      <h6 className="fw-bold m-0 text-dark" style={{ fontSize: '14px' }}>{p.name}</h6>
+                      <span className="text-secondary" style={{ fontSize: '12px' }}>Giá: ${p.price}</span>
+                    </div>
                   </div>
-                  <span className={`badge ${p.stock === 0 ? 'bg-danger' : 'bg-warning text-dark'} px-3 py-2 rounded-pill`}>
+                  <span className={`badge ${p.stock === 0 ? 'bg-danger text-white' : 'bg-warning text-dark'} px-3 py-2 rounded-pill`}>
                     {p.stock === 0 ? 'Hết hàng' : `Còn ${p.stock}`}
                   </span>
                 </div>

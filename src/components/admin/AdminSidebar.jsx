@@ -15,8 +15,8 @@ export default function AdminSidebar({ isOpen, toggleSidebar }) {
   return (
     <aside className={`admin-sidebar ${isOpen ? 'show' : ''}`}>
       <NavLink to="/admin" className="admin-sidebar-brand">
-        <Iconsax icon="box" className="fs-3 text-primary" />
-        <span>Fuzzy Admin</span>
+        <span className="admin-brand-icon" style={{ fontSize: '24px' }}>🛡️</span>
+        <span className="admin-brand-text">Fuzzy Admin</span>
       </NavLink>
 
       <ul className="admin-sidebar-menu">
