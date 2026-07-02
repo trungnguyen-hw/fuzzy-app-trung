@@ -56,63 +56,63 @@ export default function AdminDashboard() {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'Hoàn thành': return 'bg-success-subtle text-success';
-      case 'Đang giao': return 'bg-info-subtle text-info';
-      case 'Đang chuẩn bị': return 'bg-primary-subtle text-primary';
-      case 'Chờ xác nhận': return 'bg-warning-subtle text-warning';
-      case 'Đã hủy': return 'bg-danger-subtle text-danger';
-      default: return 'bg-secondary-subtle text-secondary';
+      case 'Hoàn thành': return 'admin-badge-success';
+      case 'Đang giao': return 'admin-badge-info';
+      case 'Đang chuẩn bị': return 'admin-badge-primary';
+      case 'Chờ xác nhận': return 'admin-badge-warning';
+      case 'Đã hủy': return 'admin-badge-danger';
+      default: return 'admin-badge-secondary';
     }
   };
 
   return (
-    <AdminLayout title="📊 Dashboard Tổng quan">
+    <AdminLayout title="Dashboard Overview">
       {/* Metrics Row */}
-      <div className="row g-3 mb-4">
-        <div className="col-12 col-sm-6 col-lg-4 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Tổng sản phẩm" value={metrics.productsCount} icon="box" color="primary" emoji="🛋️" trend="+5% tháng này" />
+      <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4 mb-4">
+        <div className="col">
+          <StatCard title="Total Products" value={metrics.productsCount} icon="box" color="primary" trend="+5% this month" />
         </div>
-        <div className="col-12 col-sm-6 col-lg-4 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Tổng đơn hàng" value={metrics.ordersCount} icon="shopping-bag" color="success" emoji="📦" trend="+12% tuần này" />
+        <div className="col">
+          <StatCard title="Total Orders" value={metrics.ordersCount} icon="shopping-bag" color="success" trend="+12% this week" />
         </div>
-        <div className="col-12 col-sm-6 col-lg-4 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Tổng doanh thu" value={`$${metrics.totalRevenue.toFixed(2)}`} icon="wallet-money" color="info" emoji="💰" trend="+18% tháng này" />
+        <div className="col">
+          <StatCard title="Revenue" value={`$${metrics.totalRevenue.toFixed(2)}`} icon="wallet-money" color="info" trend="+18% this month" />
         </div>
-        <div className="col-12 col-sm-6 col-lg-6 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Đơn chờ xác nhận" value={metrics.pendingOrders} icon="clock" color="warning" emoji="⏳" trend="Chờ xử lý" />
+        <div className="col">
+          <StatCard title="Pending Orders" value={metrics.pendingOrders} icon="clock" color="warning" trend="Needs attention" />
         </div>
-        <div className="col-12 col-sm-6 col-lg-6 col-xl-2-4" style={{ flex: '1 1 200px' }}>
-          <StatCard title="Tổng người dùng" value={metrics.usersCount} icon="user" color="secondary" emoji="👥" trend="+8% tháng này" />
+        <div className="col">
+          <StatCard title="Users" value={metrics.usersCount} icon="user" color="secondary" trend="+8% this month" />
         </div>
       </div>
 
       <div className="row g-4">
         {/* Recent Orders */}
         <div className="col-12 col-xl-8">
-          <div className="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="fw-bold m-0 text-dark">📦 Đơn hàng gần đây</h5>
-              <Link to="/admin/orders" className="btn btn-sm btn-outline-primary rounded-pill">Xem tất cả</Link>
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h3 className="admin-card-title">Recent Orders</h3>
+              <Link to="/admin/orders" className="admin-btn admin-btn-outline admin-btn-sm">View All</Link>
             </div>
-            <div className="table-responsive">
-              <table className="table table-hover align-middle m-0">
-                <thead className="table-light">
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
                   <tr>
-                    <th>Mã đơn</th>
-                    <th>Khách hàng</th>
-                    <th>Tổng tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày đặt</th>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Order Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentOrders.map(o => (
                     <tr key={o.id}>
-                      <td className="fw-bold text-primary">{o.id}</td>
+                      <td className="admin-td-bold text-primary">{o.id}</td>
                       <td>{o.customer}</td>
                       <td className="fw-semibold">${o.total.toFixed(2)}</td>
                       <td>
-                        <span className={`badge ${getStatusBadge(o.status)} px-3 py-2 rounded-pill`}>
+                        <span className={`admin-badge ${getStatusBadge(o.status)}`}>
                           {o.status}
                         </span>
                       </td>
@@ -127,26 +127,30 @@ export default function AdminDashboard() {
 
         {/* Low Stock Alerts */}
         <div className="col-12 col-xl-4">
-          <div className="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="fw-bold m-0 text-dark">⚠️ Cảnh báo tồn kho</h5>
-              <Iconsax icon="danger" className="text-danger fs-4" />
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h3 className="admin-card-title">Stock Alerts</h3>
+              <span className="admin-card-badge admin-badge-danger">Low Stock</span>
             </div>
-            <div className="d-flex flex-column gap-3">
-              {lowStockProducts.map(p => (
-                <div key={p.id} className="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-3 border-danger">
-                  <div className="d-flex align-items-center gap-2">
-                    <span style={{ fontSize: '18px' }}>⚠️</span>
-                    <div>
-                      <h6 className="fw-bold m-0 text-dark" style={{ fontSize: '14px' }}>{p.name}</h6>
-                      <span className="text-secondary" style={{ fontSize: '12px' }}>Giá: ${p.price}</span>
+            <div className="admin-alert-list">
+              {lowStockProducts.length === 0 ? (
+                <div className="text-center py-4 text-secondary">All products are well stocked.</div>
+              ) : (
+                lowStockProducts.map(p => (
+                  <div key={p.id} className="admin-alert-item">
+                    <div className="admin-alert-item-left">
+                      <span className="admin-alert-icon">⚠️</span>
+                      <div className="admin-alert-item-info">
+                        <h4 className="admin-alert-product-name">{p.name}</h4>
+                        <span className="admin-alert-product-price">Price: ${p.price.toFixed(2)}</span>
+                      </div>
                     </div>
+                    <span className={`admin-badge ${p.stock === 0 ? 'admin-badge-danger' : 'admin-badge-warning'}`}>
+                      {p.stock === 0 ? 'Out of stock' : `${p.stock} left`}
+                    </span>
                   </div>
-                  <span className={`badge ${p.stock === 0 ? 'bg-danger text-white' : 'bg-warning text-dark'} px-3 py-2 rounded-pill`}>
-                    {p.stock === 0 ? 'Hết hàng' : `Còn ${p.stock}`}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

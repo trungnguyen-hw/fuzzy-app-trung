@@ -104,7 +104,7 @@ export default function AdminProducts() {
     const newStatus = p.status === 'Đang bán' ? 'Ẩn' : 'Đang bán';
     await apiService.updateProduct(p.id, { ...p, status: newStatus });
     setProducts(products.map(item => item.id === p.id ? { ...item, status: newStatus } : item));
-    showToast(`Đã đổi trạng thái sản phẩm sang "${newStatus}"`);
+    showToast(`Đổi trạng thái sản phẩm sang "${newStatus}"`);
   };
 
   const handleDeleteProduct = async (id) => {
@@ -159,6 +159,15 @@ export default function AdminProducts() {
     setShowModal(false);
   };
 
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'Đang bán': return 'admin-badge-success';
+      case 'Hết hàng': return 'admin-badge-danger';
+      case 'Ẩn': return 'admin-badge-secondary';
+      default: return 'admin-badge-secondary';
+    }
+  };
+
   // Filter Logic
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -170,84 +179,86 @@ export default function AdminProducts() {
   return (
     <AdminLayout title="Quản lý Sản phẩm">
       {toastMessage && (
-        <div className="alert alert-success position-fixed top-0 end-0 m-4 shadow-lg z-3 rounded-4" style={{ zIndex: 9999 }}>
+        <div className="admin-toast">
           ✅ {toastMessage}
         </div>
       )}
 
-      {/* Action Header */}
-      <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+      {/* Toolbar / Actions */}
+      <div className="admin-toolbar mb-4">
         <div className="row g-3 align-items-center">
           <div className="col-12 col-md-4">
-            <div className="input-group">
-              <span className="input-group-text bg-light border-0"><Iconsax icon="search-normal-2" /></span>
+            <div className="admin-search-wrapper">
+              <span className="admin-search-icon"><Iconsax icon="search-normal-2" /></span>
               <input 
                 type="text" 
-                className="form-control bg-light border-0" 
-                placeholder="Tìm tên sản phẩm..."
+                className="admin-form-control" 
+                placeholder="Search products by name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
           <div className="col-6 col-md-3">
-            <select className="form-select bg-light border-0" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-              <option value="All">Tất cả danh mục</option>
+            <select className="admin-form-control" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+              <option value="All">All Categories</option>
               {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
             </select>
           </div>
           <div className="col-6 col-md-3">
-            <select className="form-select bg-light border-0" value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
-              <option value="All">Tất cả trạng thái</option>
-              <option value="Đang bán">Đang bán</option>
-              <option value="Ẩn">Ẩn</option>
-              <option value="Hết hàng">Hết hàng</option>
+            <select className="admin-form-control" value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
+              <option value="All">All Statuses</option>
+              <option value="Đang bán">Active (Đang bán)</option>
+              <option value="Ẩn">Hidden (Ẩn)</option>
+              <option value="Hết hàng">Out of stock (Hết hàng)</option>
             </select>
           </div>
           <div className="col-12 col-md-2 text-end">
-            <button onClick={handleOpenAddModal} className="btn btn-primary rounded-pill w-100 py-2 fw-semibold">
-              + Thêm SP
+            <button onClick={handleOpenAddModal} className="admin-btn admin-btn-primary w-100 py-2">
+              + Add Product
             </button>
           </div>
         </div>
       </div>
 
-      {/* Products Table */}
-      <div className="card border-0 shadow-sm rounded-4 p-4 bg-white">
-        <div className="table-responsive">
-          <table className="table table-hover align-middle m-0">
-            <thead className="table-light">
+      {/* Products Table Card */}
+      <div className="admin-card">
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <th>Ảnh</th>
-                <th>Tên sản phẩm</th>
-                <th>Danh mục</th>
-                <th>Giá bán</th>
-                <th>Tồn kho</th>
-                <th>Trạng thái</th>
-                <th className="text-end">Hành động</th>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-4 text-secondary">Không tìm thấy sản phẩm phù hợp</td>
+                  <td colSpan="7" className="text-center py-5 text-secondary">No products found matching criteria</td>
                 </tr>
               ) : (
                 filteredProducts.map(p => (
                   <tr key={p.id}>
                     <td>
-                      <img src={p.image} alt={p.name} className="rounded-3 border" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+                      <img src={p.image} alt={p.name} className="admin-product-thumbnail" />
                     </td>
                     <td>
-                      <div className="fw-bold text-dark">{p.name}</div>
-                      <span className="text-secondary" style={{ fontSize: '12px' }}>
+                      <div className="admin-product-title">{p.name}</div>
+                      <span className="admin-product-meta">
                         Color: {Array.isArray(p.colors) ? p.colors.join(', ') : p.colors} | Size: {Array.isArray(p.sizes) ? p.sizes.join(', ') : p.sizes}
                       </span>
                     </td>
-                    <td><span className="badge bg-light text-dark border">{p.category}</span></td>
                     <td>
-                      <span className="fw-bold text-primary">${p.price.toFixed(2)}</span>
-                      {p.originalPrice && <div className="text-muted text-decoration-line-through" style={{ fontSize: '12px' }}>${p.originalPrice.toFixed(2)}</div>}
+                      <span className="admin-badge admin-badge-secondary">{p.category}</span>
+                    </td>
+                    <td>
+                      <span className="admin-price-current">${p.price.toFixed(2)}</span>
+                      {p.originalPrice && <div className="admin-price-original">${p.originalPrice.toFixed(2)}</div>}
                     </td>
                     <td>
                       <span className={`fw-semibold ${p.stock === 0 ? 'text-danger' : p.stock < 5 ? 'text-warning' : 'text-dark'}`}>
@@ -255,20 +266,22 @@ export default function AdminProducts() {
                       </span>
                     </td>
                     <td>
-                      <span className={`badge ${p.status === 'Đang bán' ? 'bg-success-subtle text-success' : p.status === 'Hết hàng' ? 'bg-danger-subtle text-danger' : 'bg-secondary-subtle text-secondary'} px-3 py-2 rounded-pill`}>
+                      <span className={`admin-badge ${getStatusBadge(p.status)}`}>
                         {p.status}
                       </span>
                     </td>
                     <td className="text-end">
-                      <button onClick={() => handleToggleStatus(p)} className="btn btn-sm btn-outline-secondary me-2 rounded-circle" title="Ẩn/Hiện">
-                        <Iconsax icon={p.status === 'Ẩn' ? "eye" : "eye-slash"} />
-                      </button>
-                      <button onClick={() => handleOpenEditModal(p)} className="btn btn-sm btn-outline-primary me-2 rounded-circle" title="Sửa">
-                        <Iconsax icon="edit" />
-                      </button>
-                      <button onClick={() => handleDeleteProduct(p.id)} className="btn btn-sm btn-outline-danger rounded-circle" title="Xóa">
-                        <Iconsax icon="trash" />
-                      </button>
+                      <div className="admin-actions">
+                        <button onClick={() => handleToggleStatus(p)} className="admin-btn admin-btn-outline admin-btn-sm" title={p.status === 'Ẩn' ? "Show" : "Hide"}>
+                          <Iconsax icon={p.status === 'Ẩn' ? "eye" : "eye-slash"} />
+                        </button>
+                        <button onClick={() => handleOpenEditModal(p)} className="admin-btn admin-btn-primary admin-btn-sm ms-2" title="Edit">
+                          <Iconsax icon="edit" />
+                        </button>
+                        <button onClick={() => handleDeleteProduct(p.id)} className="admin-btn admin-btn-danger admin-btn-sm ms-2" title="Delete">
+                          <Iconsax icon="trash" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -278,66 +291,66 @@ export default function AdminProducts() {
         </div>
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Modal Add / Edit */}
       {showModal && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)' }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content rounded-4 border-0 p-3">
-              <div className="modal-header border-0 pb-0">
-                <h5 className="modal-title fw-bold">{editingId ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}</h5>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title fw-bold">{editingId ? 'Edit Product Details' : 'Add New Product'}</h5>
                 <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleSubmitForm}>
-                <div className="modal-body">
+                <div className="modal-body p-4">
                   {formError && <div className="alert alert-danger p-2 mb-3">{formError}</div>}
                   <div className="row g-3">
                     <div className="col-12 col-md-8">
-                      <label className="form-label fw-semibold">Tên sản phẩm *</label>
-                      <input type="text" className="form-control" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
+                      <label className="admin-form-label">Product Title *</label>
+                      <input type="text" className="admin-form-control w-100" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
                     </div>
                     <div className="col-12 col-md-4">
-                      <label className="form-label fw-semibold">Danh mục</label>
-                      <select className="form-select" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
+                      <label className="admin-form-label">Category</label>
+                      <select className="admin-form-control w-100" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
                         {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                       </select>
                     </div>
                     <div className="col-6 col-md-4">
-                      <label className="form-label fw-semibold">Giá bán ($) *</label>
-                      <input type="number" step="0.01" className="form-control" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
+                      <label className="admin-form-label">Selling Price ($) *</label>
+                      <input type="number" step="0.01" className="admin-form-control w-100" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
                     </div>
                     <div className="col-6 col-md-4">
-                      <label className="form-label fw-semibold">Giá gốc ($)</label>
-                      <input type="number" step="0.01" className="form-control" value={formData.originalPrice} onChange={(e) => setFormData({...formData, originalPrice: e.target.value})} />
+                      <label className="admin-form-label">Original Price ($)</label>
+                      <input type="number" step="0.01" className="admin-form-control w-100" value={formData.originalPrice} onChange={(e) => setFormData({...formData, originalPrice: e.target.value})} />
                     </div>
                     <div className="col-6 col-md-4">
-                      <label className="form-label fw-semibold">Tồn kho *</label>
-                      <input type="number" className="form-control" value={formData.stock} onChange={(e) => setFormData({...formData, stock: e.target.value})} required />
+                      <label className="admin-form-label">Quantity Stock *</label>
+                      <input type="number" className="admin-form-control w-100" value={formData.stock} onChange={(e) => setFormData({...formData, stock: e.target.value})} required />
                     </div>
                     <div className="col-6 col-md-4">
-                      <label className="form-label fw-semibold">Trạng thái</label>
-                      <select className="form-select" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
-                        <option value="Đang bán">Đang bán</option>
-                        <option value="Ẩn">Ẩn</option>
-                        <option value="Hết hàng">Hết hàng</option>
+                      <label className="admin-form-label">Sale Status</label>
+                      <select className="admin-form-control w-100" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
+                        <option value="Đang bán">Active (Đang bán)</option>
+                        <option value="Ẩn">Hidden (Ẩn)</option>
+                        <option value="Hết hàng">Out of stock (Hết hàng)</option>
                       </select>
                     </div>
                     <div className="col-6 col-md-4">
-                      <label className="form-label fw-semibold">Màu sắc (phân cách dấu phẩy)</label>
-                      <input type="text" className="form-control" value={formData.colors} onChange={(e) => setFormData({...formData, colors: e.target.value})} />
+                      <label className="admin-form-label">Colors (comma separated)</label>
+                      <input type="text" className="admin-form-control w-100" value={formData.colors} onChange={(e) => setFormData({...formData, colors: e.target.value})} />
                     </div>
                     <div className="col-6 col-md-4">
-                      <label className="form-label fw-semibold">Kích thước (phân cách dấu phẩy)</label>
-                      <input type="text" className="form-control" value={formData.sizes} onChange={(e) => setFormData({...formData, sizes: e.target.value})} />
+                      <label className="admin-form-label">Sizes (comma separated)</label>
+                      <input type="text" className="admin-form-control w-100" value={formData.sizes} onChange={(e) => setFormData({...formData, sizes: e.target.value})} />
                     </div>
                     <div className="col-12">
-                      <label className="form-label fw-semibold">Đường dẫn ảnh (URL / Asset path)</label>
-                      <input type="text" className="form-control" value={formData.image} onChange={(e) => setFormData({...formData, image: e.target.value})} />
+                      <label className="admin-form-label">Image Path or URL</label>
+                      <input type="text" className="admin-form-control w-100" value={formData.image} onChange={(e) => setFormData({...formData, image: e.target.value})} />
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer border-0 pt-3">
-                  <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={() => setShowModal(false)}>Hủy</button>
-                  <button type="submit" className="btn btn-primary rounded-pill px-4">Lưu thông tin</button>
+                <div className="modal-footer">
+                  <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" className="admin-btn admin-btn-primary">Save Product</button>
                 </div>
               </form>
             </div>

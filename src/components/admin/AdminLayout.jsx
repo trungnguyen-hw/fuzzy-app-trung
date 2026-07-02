@@ -27,7 +27,7 @@ export default function AdminLayout({ children, title }) {
   };
 
   return (
-    <div className="admin-wrapper">
+    <div className="admin-layout">
       <AdminSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="admin-main">
         <AdminHeader title={title} toggleSidebar={toggleSidebar} />

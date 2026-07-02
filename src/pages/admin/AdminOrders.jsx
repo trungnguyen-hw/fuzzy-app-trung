@@ -51,7 +51,7 @@ export default function AdminOrders() {
     if (selectedOrder && selectedOrder.id === id) {
       setSelectedOrder({ ...selectedOrder, status: newStatus });
     }
-    showToast(`Đã cập nhật đơn hàng ${id} sang trạng thái "${newStatus}"`);
+    showToast(`Cập nhật đơn hàng ${id} sang "${newStatus}"`);
   };
 
   const handleCancelOrder = async (id) => {
@@ -62,12 +62,12 @@ export default function AdminOrders() {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'Hoàn thành': return 'bg-success-subtle text-success';
-      case 'Đang giao': return 'bg-info-subtle text-info';
-      case 'Đang chuẩn bị': return 'bg-primary-subtle text-primary';
-      case 'Chờ xác nhận': return 'bg-warning-subtle text-warning';
-      case 'Đã hủy': return 'bg-danger-subtle text-danger';
-      default: return 'bg-secondary-subtle text-secondary';
+      case 'Hoàn thành': return 'admin-badge-success';
+      case 'Đang giao': return 'admin-badge-info';
+      case 'Đang chuẩn bị': return 'admin-badge-primary';
+      case 'Chờ xác nhận': return 'admin-badge-warning';
+      case 'Đã hủy': return 'admin-badge-danger';
+      default: return 'admin-badge-secondary';
     }
   };
 
@@ -81,36 +81,36 @@ export default function AdminOrders() {
   return (
     <AdminLayout title="Quản lý Đơn hàng">
       {toastMessage && (
-        <div className="alert alert-success position-fixed top-0 end-0 m-4 shadow-lg z-3 rounded-4" style={{ zIndex: 9999 }}>
+        <div className="admin-toast">
           ✅ {toastMessage}
         </div>
       )}
 
       {/* Action Header */}
-      <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+      <div className="admin-toolbar mb-4">
         <div className="row g-3 align-items-center">
-          <div className="col-12 col-md-6">
-            <div className="input-group">
-              <span className="input-group-text bg-light border-0"><Iconsax icon="search-normal-2" /></span>
+          <div className="col-12 col-md-5">
+            <div className="admin-search-wrapper">
+              <span className="admin-search-icon"><Iconsax icon="search-normal-2" /></span>
               <input 
                 type="text" 
-                className="form-control bg-light border-0" 
-                placeholder="Tìm mã đơn hàng hoặc tên khách hàng..."
+                className="admin-form-control" 
+                placeholder="Search orders by ID or customer name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
-          <div className="col-12 col-md-6">
-            <div className="d-flex gap-2 flex-wrap">
+          <div className="col-12 col-md-7">
+            <div className="d-flex gap-2 flex-wrap justify-content-md-end">
               {['All', ...statusOptions].map(st => (
                 <button
                   key={st}
                   type="button"
                   onClick={() => setSelectedStatus(st)}
-                  className={`btn btn-sm ${selectedStatus === st ? 'btn-primary' : 'btn-outline-secondary'} rounded-pill px-3`}
+                  className={`admin-btn ${selectedStatus === st ? 'admin-btn-primary' : 'admin-btn-outline'} admin-btn-sm`}
                 >
-                  {st === 'All' ? 'Tất cả' : st}
+                  {st === 'All' ? 'All Orders' : st}
                 </button>
               ))}
             </div>
@@ -118,58 +118,60 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="card border-0 shadow-sm rounded-4 p-4 bg-white">
-        <div className="table-responsive">
-          <table className="table table-hover align-middle m-0">
-            <thead className="table-light">
+      {/* Orders Table Card */}
+      <div className="admin-card">
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <th>Mã đơn</th>
-                <th>Khách hàng</th>
-                <th>Số món</th>
-                <th>Tổng tiền</th>
-                <th>Thanh toán</th>
-                <th>Ngày đặt</th>
-                <th>Trạng thái</th>
-                <th className="text-end">Hành động</th>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Items Count</th>
+                <th>Total Price</th>
+                <th>Payment Method</th>
+                <th>Order Date</th>
+                <th>Status</th>
+                <th className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-4 text-secondary">Không có đơn hàng phù hợp</td>
+                  <td colSpan="8" className="text-center py-5 text-secondary">No orders found matching criteria</td>
                 </tr>
               ) : (
                 filteredOrders.map(o => (
                   <tr key={o.id}>
-                    <td className="fw-bold text-primary">{o.id}</td>
+                    <td className="admin-td-bold text-primary">{o.id}</td>
                     <td>
                       <div className="fw-semibold text-dark">{o.customer}</div>
                       <span className="text-secondary" style={{ fontSize: '12px' }}>{o.phone || o.email}</span>
                     </td>
                     <td>{o.items ? o.items.length : 1} items</td>
                     <td className="fw-bold text-dark">${o.total.toFixed(2)}</td>
-                    <td><span className="badge bg-light text-dark border">{o.paymentMethod || 'COD'}</span></td>
+                    <td><span className="admin-badge admin-badge-secondary">{o.paymentMethod || 'COD'}</span></td>
                     <td className="text-secondary" style={{ fontSize: '13px' }}>{o.date}</td>
                     <td>
                       <select 
-                        className={`form-select form-select-sm border-0 rounded-pill ${getStatusBadge(o.status)} fw-semibold`}
+                        className={`admin-form-control admin-select-sm fw-semibold ${getStatusBadge(o.status)}`}
                         value={o.status}
                         onChange={(e) => handleUpdateStatus(o.id, e.target.value)}
-                        style={{ width: '140px', cursor: 'pointer' }}
+                        style={{ width: '150px', cursor: 'pointer', padding: '6px 12px' }}
                       >
                         {statusOptions.map(st => <option key={st} value={st} className="bg-white text-dark">{st}</option>)}
                       </select>
                     </td>
                     <td className="text-end">
-                      <button onClick={() => setSelectedOrder(o)} className="btn btn-sm btn-outline-info me-2 rounded-circle" title="Xem chi tiết">
-                        <Iconsax icon="eye" />
-                      </button>
-                      {o.status !== 'Hoàn thành' && o.status !== 'Đã hủy' && (
-                        <button onClick={() => handleCancelOrder(o.id)} className="btn btn-sm btn-outline-danger rounded-circle" title="Hủy đơn">
-                          <Iconsax icon="close-circle" />
+                      <div className="admin-actions justify-content-end">
+                        <button onClick={() => setSelectedOrder(o)} className="admin-btn admin-btn-outline admin-btn-sm" title="View details">
+                          <Iconsax icon="eye" />
                         </button>
-                      )}
+                        {o.status !== 'Hoàn thành' && o.status !== 'Đã hủy' && (
+                          <button onClick={() => handleCancelOrder(o.id)} className="admin-btn admin-btn-danger admin-btn-sm ms-2" title="Cancel order">
+                            <Iconsax icon="close-circle" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -181,40 +183,43 @@ export default function AdminOrders() {
 
       {/* Order Details Modal */}
       {selectedOrder && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)' }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content rounded-4 border-0 p-3">
-              <div className="modal-header border-0 pb-0">
+            <div className="modal-content">
+              <div className="modal-header">
                 <div>
                   <h5 className="modal-title fw-bold">Chi tiết Đơn hàng #{selectedOrder.id}</h5>
                   <span className="text-secondary" style={{ fontSize: '13px' }}>Ngày đặt: {selectedOrder.date}</span>
                 </div>
                 <button type="button" className="btn-close" onClick={() => setSelectedOrder(null)}></button>
               </div>
-              <div className="modal-body">
+              <div className="modal-body p-4">
                 <div className="row g-3 mb-4">
                   <div className="col-12 col-md-6">
-                    <div className="p-3 bg-light rounded-3 h-100">
-                      <h6 className="fw-bold mb-2">Thông tin khách hàng</h6>
-                      <div><strong>Họ tên:</strong> {selectedOrder.customer}</div>
-                      <div><strong>Email:</strong> {selectedOrder.email || 'agasya@fuzzy.com'}</div>
+                    <div className="p-3 bg-light rounded-3 h-100 border">
+                      <h6 className="fw-bold mb-2 text-dark">Thông tin khách hàng</h6>
+                      <div className="mb-1"><strong>Họ tên:</strong> {selectedOrder.customer}</div>
+                      <div className="mb-1"><strong>Email:</strong> {selectedOrder.email || 'agasya@fuzzy.com'}</div>
                       <div><strong>SĐT:</strong> {selectedOrder.phone || '0912345678'}</div>
                     </div>
                   </div>
                   <div className="col-12 col-md-6">
-                    <div className="p-3 bg-light rounded-3 h-100">
-                      <h6 className="fw-bold mb-2">Địa chỉ & Thanh toán</h6>
-                      <div><strong>Địa chỉ:</strong> {selectedOrder.address || '790 Hyde Park Rd, Ontario'}</div>
-                      <div><strong>Phương thức:</strong> {selectedOrder.paymentMethod || 'Mastercard'}</div>
-                      <div><strong>Trạng thái:</strong> <span className={`badge ${getStatusBadge(selectedOrder.status)} ms-1`}>{selectedOrder.status}</span></div>
+                    <div className="p-3 bg-light rounded-3 h-100 border">
+                      <h6 className="fw-bold mb-2 text-dark">Địa chỉ & Thanh toán</h6>
+                      <div className="mb-1"><strong>Địa chỉ:</strong> {selectedOrder.address || '790 Hyde Park Rd, Ontario'}</div>
+                      <div className="mb-1"><strong>Phương thức:</strong> {selectedOrder.paymentMethod || 'Mastercard'}</div>
+                      <div className="d-flex align-items-center">
+                        <strong>Trạng thái:</strong> 
+                        <span className={`admin-badge ${getStatusBadge(selectedOrder.status)} ms-2`}>{selectedOrder.status}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <h6 className="fw-bold mb-2">Danh sách sản phẩm</h6>
-                <div className="table-responsive border rounded-3 mb-3">
-                  <table className="table table-sm align-middle m-0">
-                    <thead className="table-light">
+                <h6 className="fw-bold mb-2 text-dark">Danh sách sản phẩm</h6>
+                <div className="admin-table-wrapper border rounded-3 mb-3">
+                  <table className="admin-table table-sm">
+                    <thead>
                       <tr>
                         <th>Sản phẩm</th>
                         <th>Số lượng</th>
@@ -239,13 +244,13 @@ export default function AdminOrders() {
                   </table>
                 </div>
 
-                <div className="d-flex justify-content-between align-items-center p-3 bg-primary-subtle text-primary rounded-3">
+                <div className="d-flex justify-content-between align-items-center p-3 bg-primary-subtle text-primary rounded-3 border border-primary-subtle">
                   <h5 className="fw-bold m-0">Tổng tiền đơn hàng</h5>
                   <h4 className="fw-bold m-0">${selectedOrder.total.toFixed(2)}</h4>
                 </div>
               </div>
-              <div className="modal-footer border-0 pt-0">
-                <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={() => setSelectedOrder(null)}>Đóng</button>
+              <div className="modal-footer">
+                <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setSelectedOrder(null)}>Đóng</button>
               </div>
             </div>
           </div>
