@@ -19,6 +19,8 @@ export const apiService = {
   },
 
   async login(account, password) {
+    console.log('API_BASE_URL:', API_BASE_URL)
+    console.log('Login API URL:', `${API_BASE_URL}/api/auth/login`)
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
