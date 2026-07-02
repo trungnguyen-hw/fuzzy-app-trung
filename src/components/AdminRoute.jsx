@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 
 export default function AdminRoute({ children }) {
   const { user } = useApp();
-  const token = localStorage.getItem('fuzzy_token');
+  const token = localStorage.getItem('token') || localStorage.getItem('fuzzy_token');
 
   const isLoggedIn = user && user.isLoggedIn && (token || user.email || user.username);
   const isAdmin = isLoggedIn && (user.role === 'admin' || user.email === 'trungngo1903' || user.username === 'trungngo1903' || token === 'mock_jwt_token_admin');

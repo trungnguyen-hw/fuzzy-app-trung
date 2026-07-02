@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Iconsax from '../components/Iconsax';
 import { useApp } from '../context/AppContext';
+import { apiService } from '../services/api';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, user } = useApp();
+  const { setUser, user } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +24,7 @@ export default function Login() {
   // Direct redirection if already fully logged in to both gate and store
   useEffect(() => {
     const isUnlocked = localStorage.getItem('fuzzy_app_unlocked') === 'true';
-    const token = localStorage.getItem('fuzzy_token');
+    const token = localStorage.getItem('token') || localStorage.getItem('fuzzy_token');
     const isLoggedIn = user?.isLoggedIn || token;
     
     if (isUnlocked && isLoggedIn) {
@@ -49,13 +50,21 @@ export default function Login() {
     }
 
     try {
-      const res = await login(email.trim(), password);
+      const result = await apiService.login(email.trim(), password);
       
-      // Unlock the gate on any successful login
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+
+      // Compatibility for other routes and components
+      localStorage.setItem('fuzzy_token', result.token);
       localStorage.setItem('fuzzy_app_unlocked', 'true');
 
-      // Navigate based on user role
-      if (res.user?.role === 'admin') {
+      setUser({
+        ...result.user,
+        isLoggedIn: true
+      });
+
+      if (result.user.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/');

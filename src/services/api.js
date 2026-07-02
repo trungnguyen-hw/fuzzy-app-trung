@@ -18,18 +18,26 @@ export const apiService = {
     }
   },
 
-  async login(email, password) {
-    const res = await fetch(`${API_BASE}/auth/login`, {
+  async login(account, password) {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, username: email, password })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Sai tài khoản hoặc mật khẩu, vui lòng thử lại');
-    if (data.token) {
-      localStorage.setItem('fuzzy_token', data.token);
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: account,
+        username: account,
+        password: password
+      })
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Sai tài khoản hoặc mật khẩu, vui lòng thử lại')
     }
-    return data;
+
+    return data
   },
 
   // Products
@@ -151,7 +159,7 @@ export const apiService = {
 
   async createOrder(orderData) {
     try {
-      const token = localStorage.getItem('fuzzy_token');
+      const token = localStorage.getItem('token') || localStorage.getItem('fuzzy_token');
       const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers: { 
@@ -201,7 +209,7 @@ export const apiService = {
 
   async updateProfile(profileData) {
     try {
-      const token = localStorage.getItem('fuzzy_token');
+      const token = localStorage.getItem('token') || localStorage.getItem('fuzzy_token');
       const res = await fetch(`${API_BASE}/users/profile`, {
         method: 'PUT',
         headers: { 

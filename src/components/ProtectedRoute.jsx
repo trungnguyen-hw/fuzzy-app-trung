@@ -6,7 +6,7 @@ export default function ProtectedRoute({ children }) {
   const { user } = useApp();
   
   // Check if user is logged in or token exists
-  const token = localStorage.getItem('fuzzy_token');
+  const token = localStorage.getItem('token') || localStorage.getItem('fuzzy_token');
   const isLoggedIn = user && user.isLoggedIn && (token || user.email);
 
   if (!isLoggedIn) {

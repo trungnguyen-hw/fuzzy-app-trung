@@ -86,8 +86,18 @@ export const AppProvider = ({ children }) => {
 
   // Auth State
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('fuzzy_user');
-    return saved ? JSON.parse(saved) : { name: "", email: "", isLoggedIn: false };
+    const saved = localStorage.getItem('user') || localStorage.getItem('fuzzy_user');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          return { ...parsed, isLoggedIn: parsed.isLoggedIn !== undefined ? parsed.isLoggedIn : true };
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return { name: "", email: "", isLoggedIn: false };
   });
 
   // Orders State
@@ -119,6 +129,7 @@ export const AppProvider = ({ children }) => {
   }, [wishlist]);
 
   useEffect(() => {
+    localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('fuzzy_user', JSON.stringify(user));
   }, [user]);
 
@@ -249,7 +260,10 @@ export const AppProvider = ({ children }) => {
   };
 
   const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     localStorage.removeItem('fuzzy_token');
+    localStorage.removeItem('fuzzy_user');
     localStorage.removeItem('fuzzy_app_unlocked');
     setUser({ name: "", email: "", isLoggedIn: false });
   };
@@ -295,6 +309,7 @@ export const AppProvider = ({ children }) => {
       removeFromWishlist,
       isInWishlist,
       user,
+      setUser,
       registerUser,
       login,
       logout,
