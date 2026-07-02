@@ -12,7 +12,11 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Login Modal State
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [loginStatus, setLoginStatus] = useState('loading'); // 'loading' | 'success' | 'error'
+  const [loginMessage, setLoginMessage] = useState('');
 
   // Dynamically set body class for auth page styling
   useEffect(() => {
@@ -42,18 +46,19 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
 
     if (!email || !email.trim()) {
       setError('Please enter your Email id');
-      setIsLoading(false);
       return;
     }
     if (!password || !password.trim()) {
       setError('Please enter your Password');
-      setIsLoading(false);
       return;
     }
+
+    setIsLoginModalOpen(true);
+    setLoginStatus('loading');
+    setLoginMessage('Đang đăng nhập...');
 
     try {
       console.log('Calling login API...');
@@ -64,6 +69,9 @@ export default function Login() {
 
       console.log('Login API response:', result);
       
+      setLoginStatus('success');
+      setLoginMessage('Chúc bạn mua sắm vui vẻ');
+
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
 
@@ -76,6 +84,9 @@ export default function Login() {
         isLoggedIn: true
       });
 
+      await delay(1200);
+      setIsLoginModalOpen(false);
+
       if (result.user.role === 'admin') {
         navigate('/admin');
       } else {
@@ -83,18 +94,137 @@ export default function Login() {
       }
     } catch (err) {
       console.error('Login error:', err);
+      setLoginStatus('error');
+      
+      let errMsg = 'Sai tài khoản hoặc mật khẩu, vui lòng thử lại';
       if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('Failed to connect') || err.message.includes('NetworkError'))) {
-        setError('Không thể kết nối máy chủ, vui lòng thử lại');
-      } else {
-        setError(err.message || 'Sai tài khoản hoặc mật khẩu, vui lòng thử lại');
+        errMsg = 'Không thể kết nối máy chủ, vui lòng thử lại';
+      } else if (err.message) {
+        errMsg = err.message;
       }
-    } finally {
-      setIsLoading(false);
+      
+      setLoginMessage(errMsg);
+      setError(errMsg);
+
+      await delay(1500);
+      setIsLoginModalOpen(false);
     }
   };
 
   return (
     <>
+      <style>{`
+        .login-status-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(15, 23, 42, 0.65);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          z-index: 99999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: fadeInOverlay 0.3s ease;
+        }
+
+        .login-status-modal {
+          background: #ffffff;
+          border-radius: 24px;
+          padding: 36px 24px;
+          width: 90%;
+          max-width: 320px;
+          text-align: center;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          animation: zoomInModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .login-spinner {
+          width: 48px;
+          height: 48px;
+          border: 4px solid #f1f5f9;
+          border-top: 4px solid #2563eb;
+          border-radius: 50%;
+          animation: loginSpin 0.8s linear infinite;
+        }
+
+        .login-status-icon {
+          width: 64px;
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          font-size: 28px;
+          font-weight: bold;
+        }
+
+        .login-status-icon.success {
+          background-color: #ecfdf5;
+          color: #10b981;
+          animation: scaleUpIcon 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .login-status-icon.error {
+          background-color: #fee2e2;
+          color: #ef4444;
+          animation: shakeIcon 0.4s ease-in-out;
+        }
+
+        .login-status-message {
+          font-size: 14.5px;
+          font-weight: 700;
+          color: #1e293b;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        @keyframes fadeInOverlay {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes zoomInModal {
+          from { transform: scale(0.9); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes loginSpin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        @keyframes scaleUpIcon {
+          from { transform: scale(0); }
+          to { transform: scale(1); }
+        }
+
+        @keyframes shakeIcon {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-6px); }
+          50% { transform: translateX(6px); }
+          75% { transform: translateX(-4px); }
+        }
+      `}</style>
+
+      {isLoginModalOpen && (
+        <div className="login-status-overlay">
+          <div className="login-status-modal">
+            {loginStatus === 'loading' && <div className="login-spinner"></div>}
+            {loginStatus === 'success' && <div className="login-status-icon success">✓</div>}
+            {loginStatus === 'error' && <div className="login-status-icon error">✕</div>}
+            <p className="login-status-message">{loginMessage}</p>
+          </div>
+        </div>
+      )}
+
       {/* login section start */}
       <div className="auth-img">
         <img className="img-fluid auth-bg" src="/assets/images/background/auth_bg.jpg" alt="auth_bg" />
@@ -119,7 +249,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isLoginModalOpen}
               />
               <Iconsax icon="mail" className="icons" />
             </div>
@@ -136,7 +266,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isLoginModalOpen}
                 style={{ paddingRight: '75px' }}
               />
               <Iconsax icon="key" className="icons" style={{ right: '15px' }} />
@@ -144,7 +274,7 @@ export default function Login() {
                 type="button"
                 className="border-0 bg-transparent position-absolute"
                 onClick={() => setShowPassword(!showPassword)}
-                disabled={isLoading}
+                disabled={isLoginModalOpen}
                 style={{ right: '45px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer', color: '#cbd5e1' }}
               >
                 <Iconsax icon={showPassword ? "eye-slash" : "eye"} style={{ fontSize: '18px' }} />
@@ -167,8 +297,8 @@ export default function Login() {
           )}
 
           <div className="submit-btn mt-4">
-            <button type="submit" className="btn auth-btn w-100" disabled={isLoading}>
-              {isLoading ? (
+            <button type="submit" className="btn auth-btn w-100" disabled={isLoginModalOpen}>
+              {isLoginModalOpen && loginStatus === 'loading' ? (
                 <span className="d-flex align-items-center justify-content-center gap-2">
                   <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '1rem', height: '1rem' }}></span>
                   Đang xác thực...
