@@ -12,6 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Dynamically set body class for auth page styling
   useEffect(() => {
@@ -36,21 +37,32 @@ export default function Login() {
     }
   }, [user, navigate]);
 
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     if (!email || !email.trim()) {
       setError('Please enter your Email id');
+      setIsLoading(false);
       return;
     }
     if (!password || !password.trim()) {
       setError('Please enter your Password');
+      setIsLoading(false);
       return;
     }
 
     try {
-      const result = await apiService.login(email.trim(), password);
+      console.log('Calling login API...');
+      const [result] = await Promise.all([
+        apiService.login(email.trim(), password),
+        delay(800)
+      ]);
+
+      console.log('Login API response:', result);
       
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
@@ -70,7 +82,14 @@ export default function Login() {
         navigate('/');
       }
     } catch (err) {
-      setError('Sai tài khoản hoặc mật khẩu, vui lòng thử lại');
+      console.error('Login error:', err);
+      if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('Failed to connect') || err.message.includes('NetworkError'))) {
+        setError('Không thể kết nối máy chủ, vui lòng thử lại');
+      } else {
+        setError(err.message || 'Sai tài khoản hoặc mật khẩu, vui lòng thử lại');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,6 +119,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
               <Iconsax icon="mail" className="icons" />
             </div>
@@ -116,6 +136,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
                 style={{ paddingRight: '75px' }}
               />
               <Iconsax icon="key" className="icons" style={{ right: '15px' }} />
@@ -123,6 +144,7 @@ export default function Login() {
                 type="button"
                 className="border-0 bg-transparent position-absolute"
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={isLoading}
                 style={{ right: '45px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, cursor: 'pointer', color: '#cbd5e1' }}
               >
                 <Iconsax icon={showPassword ? "eye-slash" : "eye"} style={{ fontSize: '18px' }} />
@@ -145,7 +167,16 @@ export default function Login() {
           )}
 
           <div className="submit-btn mt-4">
-            <button type="submit" className="btn auth-btn w-100">Sign In</button>
+            <button type="submit" className="btn auth-btn w-100" disabled={isLoading}>
+              {isLoading ? (
+                <span className="d-flex align-items-center justify-content-center gap-2">
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '1rem', height: '1rem' }}></span>
+                  Đang xác thực...
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </button>
           </div>
 
           <div className="division">
